@@ -5,17 +5,31 @@ networks:
 
 
 services:
+  nginx_gateway_services:
+    image: nginx:1.23.2
+    container_name: registry_gateway_container
+    restart: always
+    volumes:
+      - ./conf/nginx:/etc/nginx/conf.d
+    ports:
+      - 34800:34800
+    links:
+      - docker_registry_services
+      - docker_registry_gui
+    networks:
+      - docker_registry
+
   docker_registry_services:
     user: root
     container_name: docker_registry_container
     image: registry:2
     restart: always
-    environment:
-      - REGISTRY_HTTP_ADDR=0.0.0.0:34500
     ports:
       - 34500:34500
+    environment:
+      - REGISTRY_HTTP_ADDR=0.0.0.0:34500
     volumes:
-      - ./conf:/etc/docker/registry
+      - ./conf/registry:/etc/docker/registry
       - ./data/registry:/var/lib/registry
     networks:
       - docker_registry
@@ -25,10 +39,8 @@ services:
     container_name: docker_registry_gui_container
     image: joxit/docker-registry-ui
     restart: always
-    ports:
-      - 34800:80
     environment:
       - REGISTRY_TITLE=shicheng.yu-private-dockerhub
-      - REGISTRY_URL=http://localhost:34500
+      - REGISTRY_URL=/
     networks:
       - docker_registry
