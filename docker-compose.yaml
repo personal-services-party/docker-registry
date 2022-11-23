@@ -41,6 +41,5 @@ services:
     restart: always
     environment:
       - REGISTRY_TITLE=shicheng.yu-private-dockerhub
-      - REGISTRY_URL=/
     networks:
       - docker_registry
