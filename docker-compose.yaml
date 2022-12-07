@@ -1,7 +1,7 @@
 version: "3.0"
 
 networks:
-  docker_registry:
+  docker_registry_network:
 
 
 services:
@@ -12,34 +12,29 @@ services:
     volumes:
       - ./conf/nginx:/etc/nginx/conf.d
     ports:
-      - 34800:34800
-    links:
-      - docker_registry_services
-      - docker_registry_gui
+      - 5480:80
+      - 54443:443
     networks:
-      - docker_registry
+      - docker_registry_network
 
   docker_registry_services:
-    user: root
     container_name: docker_registry_container
     image: registry:2
     restart: always
-    ports:
-      - 34500:34500
     environment:
-      - REGISTRY_HTTP_ADDR=0.0.0.0:34500
+      - REGISTRY_HTTP_ADDR=0.0.0.0:5000
+      - REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io/
     volumes:
-      - ./conf/registry:/etc/docker/registry
+      - ./auth:/auth
       - ./data/registry:/var/lib/registry
     networks:
-      - docker_registry
+      - docker_registry_network
 
   docker_registry_gui:
-    user: root
     container_name: docker_registry_gui_container
     image: joxit/docker-registry-ui
     restart: always
     environment:
-      - REGISTRY_TITLE=shicheng.yu-private-dockerhub
+      - REGISTRY_TITLE=private_dockerhub
     networks:
-      - docker_registry
+      - docker_registry_network
